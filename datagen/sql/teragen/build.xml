@@ -1,0 +1,70 @@
+<?xml version="1.0" ?>
+<project default="teragen" name="TeraGen MapReduce">
+
+   <!-- make environment var FOO available as env.FOO -->
+   <property environment="env"/>
+   
+   <property name='build.dir'     location='bin/' />
+   <property name='src.dir'       location='src/' />
+   <property name='lib.dir'       location='lib/' />
+   
+   <path id='project.classpath'>
+      <pathelement location='${build.dir}' />
+      <fileset dir='${lib.dir}'>
+         <include name='*.jar' />
+      </fileset>
+      <fileset dir='${env.HADOOP_HOME}/lib'>
+         <include name='*.jar' />
+      </fileset>
+      <fileset dir='${env.HADOOP_HOME}'>
+         <include name='*.jar' />
+      </fileset>
+      <pathelement path="${java.class.path}"/>
+   </path>
+   
+   
+   <!--
+   ***************************************
+   CLEANING
+   ***************************************
+   -->
+   
+   <target name='clean' description="remove all compiled files">
+      <delete includeemptydirs="true" failonerror='false'>
+         <fileset dir="${build.dir}" includes="**/*" />
+      </delete>
+      <delete dir="${build.dir}" />
+      <delete file="teragen.jar" />
+   </target>
+   
+   <!--
+   ***************************************
+   JAR BUILDING
+   ***************************************
+   -->
+   
+   <target name="teragen" depends="compile">
+      <jar destfile="teragen.jar">
+         <fileset dir="${build.dir}" defaultexcludes="yes">
+            <include name="org/**"/>
+         </fileset>
+         <manifest>
+            <attribute name="Main-Class" value="org.apache.hadoop.examples.terasort.TeraGen" />
+         </manifest>
+      </jar>
+   </target>
+   
+   <!--
+   ***************************************
+   JAVA COMPILATION
+   ***************************************
+   -->
+   
+   <target name="compile">
+      <mkdir dir='${build.dir}' />
+      <javac target="1.6" srcdir="${src.dir}" destdir='${build.dir}' debug='true'>
+         <classpath refid="project.classpath" />
+      </javac>
+   </target>
+
+</project>

@@ -1,0 +1,16 @@
+There are two programs here:
+
+genhtml -- Generate a collection of fake HTML files with links between them
+parsehtml -- Parse the HTML files output by genhtml and compute URL frequencies
+
+See comments at the beginning of genhtml.c and parsehtml.c for usage instructions.
+
+To build, type:
+
+make genhtml
+
+or
+
+make parsehtml
+
+

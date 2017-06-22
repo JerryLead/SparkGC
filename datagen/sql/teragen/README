@@ -1,0 +1,22 @@
+## =======================================================
+## MapReduce Benchmarks - TeraGen Data Generator
+## Andy Pavlo - http://www.cs.brown.edu/~pavlo
+## December 23, 2008
+## =======================================================
+
+This is a modified version of the Yahoo TeraGen code that allows you to insert
+a special search pattern at set intervals inside of the the values.
+The random values/keys are more disparate, which will limit the compression rate
+for the data (this is good for benchmarks).
+
+## -------------------------------------------------------
+
+Instructions:
+
+To Be Written
+
+## -------------------------------------------------------
+
+Tools:
+
+To be written
