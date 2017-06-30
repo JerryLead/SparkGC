@@ -5,21 +5,28 @@ import org.apache.spark.sql.types.{StringType, StructField, StructType}
 
 /**
   * Created by xulijie on 17-6-21.
+  *
+  * SELECT * FROM UserVisits GROUP BY SUBSTR(sourceIP, 1, 7);
   */
 object RDDGroupByTest {
   def main(args: Array[String]): Unit = {
 
+    if (args.length < 2) {
+      System.err.println("Usage: RDDGroupByTest <table_hdfs_file> <output_file>")
+      System.exit(1)
+    }
+
     // $example on:init_session$
     val spark = SparkSession
-      .builder().master("local[2]")
-      .appName("RDDGroupByTest")
+      .builder()
       .getOrCreate()
+
 
     // $example off:init_session$
     // $example on:programmatic_schema$
     // Create an RDD
 
-    val uservisits = spark.sparkContext.textFile("sampledata/sql/Rankings-UserVisits/UserVisits.txt")
+    val uservisits = spark.sparkContext.textFile(args(0))
 
 
     // The schema is encoded in a string
@@ -42,15 +49,12 @@ object RDDGroupByTest {
     // Creates a temporary view using the DataFrame
     // uservisitsDF.createOrReplaceTempView("uservisits")
 
-
     // SQL can be run over a temporary view created using DataFrames
     // val results = spark.sql("SELECT name FROM people")
 
-    val result = uservisitsRDD.groupByKey(4)
+    val result = uservisitsRDD.groupByKey()
 
-    println(result.toDebugString)
-
-    result.foreach(println)
+    result.saveAsTextFile(args(1))
   }
 
 }

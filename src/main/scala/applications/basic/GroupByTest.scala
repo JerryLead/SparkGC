@@ -10,7 +10,7 @@ import org.apache.spark.sql.SparkSession
 object GroupByTest {
   def main(args: Array[String]) {
     val spark = SparkSession
-      .builder
+      .builder.master("local[2]")
       .getOrCreate()
 
     val numMappers = if (args.length > 0) args(0).toInt else 2
