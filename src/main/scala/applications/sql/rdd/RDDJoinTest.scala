@@ -5,6 +5,8 @@ import org.apache.spark.sql.{Row, SparkSession}
 
 /**
   * Created by xulijie on 17-6-20.
+  *
+  * SELECT * FROM Rankings As R, UserVisits As UV WHERE R.pageURL = UR.destURL
   */
 object RDDJoinTest {
   def main(args: Array[String]): Unit = {
