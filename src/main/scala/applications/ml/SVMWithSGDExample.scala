@@ -25,7 +25,7 @@ object SVMWithSGDExample {
 
     val path = args(0)
     val numIterations = args(1).toInt
-    val numFeatures = args(2).toInt
+    val numFeatures = args(2).toInt // kdd12=54686452, kdd12-0.5=27343226
 
 
     // val path = "sampledata/mllib/kdd12-sample.txt"
