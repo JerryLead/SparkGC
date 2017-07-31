@@ -26,8 +26,8 @@ object PageRank {
   }
 
   def main(args: Array[String]) {
-    if (args.length < 1) {
-      System.err.println("Usage: SparkPageRank <file> <iter>")
+    if (args.length < 3) {
+      System.err.println("Usage: PageRank <input_file> <iter> <output_file>")
       System.exit(1)
     }
 
