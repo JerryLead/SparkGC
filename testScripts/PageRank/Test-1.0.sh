@@ -75,7 +75,7 @@ if [ $CMS -ge 1 ] && [ $E4 -eq 1 ]; then
      ./doCommand.sh "echo 3 > /proc/sys/vm/drop_caches"
      sleep 5
      logFile=$logDir/$appName-CMS-4-28G-$p-n$i.log
-     ./$appName-CMS.sh 4 28G $$p $table $iter $output $logFile
+     ./$appName-CMS.sh 4 28G $p $table $iter $output $logFile
    done
 fi
 

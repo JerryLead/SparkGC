@@ -19,6 +19,17 @@ E1=1
 E2=1
 E4=1
 
+query = [1,2,3,4,5]
+query = [2]
+start =4 , end 5
+for query.
+  delete output
+  start slaves
+  sleep2
+  execute query
+  done
+
+
 if [ $Parallel -ge 1 ] && [ $E4 -eq 1 ]; then
    for ((i=$s; i<=$e; i++))
    do
