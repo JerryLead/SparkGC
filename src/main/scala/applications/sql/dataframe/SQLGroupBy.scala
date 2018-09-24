@@ -12,18 +12,17 @@ import org.apache.spark.sql.{Row, SparkSession}
 object SQLGroupBy {
   def main(args: Array[String]): Unit = {
 
-    /*
     if (args.length < 2) {
-      System.err.println("Usage: DataFrameGroupBy <table_hdfs_file> <output_file>")
+      System.err.println("Usage: SQLGroupBy <table_hdfs_file> <output_file>")
       System.exit(1)
     }
-    */
-    val uservisitsPath = "/Users/xulijie/Documents/data/SQLdata/UserVisits-100.txt"
+
+    // val uservisitsPath = "/Users/xulijie/Documents/data/SQLdata/UserVisits-100.txt"
 
     // $example on:init_session$
     val spark = SparkSession
       .builder()
-      .master("local[2]")
+      // .config("spark.sql.shuffle.partitions", 32)
       .getOrCreate()
 
 
@@ -31,7 +30,7 @@ object SQLGroupBy {
     // $example on:programmatic_schema$
     // Create an RDD
 
-    val uservisits = spark.sparkContext.textFile(uservisitsPath)
+    val uservisits = spark.sparkContext.textFile(args(0))
 
 
     // The schema is encoded in a string
@@ -68,11 +67,14 @@ object SQLGroupBy {
     //  .groupBy(substring(col("sourceIP"), 1, 7)).sum("adRevenue")
 
     // SQL can be run over a temporary view created using DataFrames
-    val results = spark.sql("SELECT SUBSTR(sourceIP, 1, 7), SUM(adRevenue) FROM uservisits GROUP BY SUBSTR(sourceIP, 1, 7)")
+    val results = spark.sql("SELECT SUBSTR(sourceIP, 1, 7) AS IP, SUM(adRevenue) AS SUM " +
+      "FROM uservisits GROUP BY SUBSTR(sourceIP, 1, 7)")
 
     println(results.rdd.toDebugString)
     println(results.explain())
-    results.show()//.saveAsTextFile(args(1))
+    // results.write.csv("/Users/xulijie/Documents/data/SQLdata/output")
+    results.write.csv(args(1))
+
   }
 
 }
