@@ -7,22 +7,27 @@ import org.apache.spark.sql.{Row, SparkSession}
 /**
   * Created by xulijie on 17-6-21.
   *
-  * SELECT SUBSTR(sourceIP, 1, 7), SUM(adRevenue) FROM uservisits GROUP BY SUBSTR(sourceIP, 1, 7);
+  * SELECT * FROM Rankings As R, UserVisits As U
+  * WHERE R.URL = U.URL;
   */
-object SQLGroupBy {
+object LocalSQLJoin {
   def main(args: Array[String]): Unit = {
 
-    if (args.length < 2) {
-      System.err.println("Usage: SQLGroupBy <table_hdfs_file> <output_file>")
+    /*
+    if (args.length < 3) {
+      System.err.println("Usage: RDDJoinTest <table1_hdfs_file> <table2_hdfs_file> <output_file>")
       System.exit(1)
     }
+    */
 
-    // val uservisitsPath = "/Users/xulijie/Documents/data/SQLdata/UserVisits-100.txt"
+    val uservisitsPath = "/Users/xulijie/Documents/data/SQLdata/UserVisits-100.txt"
+    val rankingsPath = "/Users/xulijie/Documents/data/SQLdata/Rankings-100.txt"
 
     // $example on:init_session$
     val spark = SparkSession
       .builder()
-      // .config("spark.sql.shuffle.partitions", 32)
+      .master("local[2]")
+      .config("spark.sql.shuffle.partitions", 32)
       .getOrCreate()
 
 
@@ -30,11 +35,9 @@ object SQLGroupBy {
     // $example on:programmatic_schema$
     // Create an RDD
 
-    val uservisits = spark.sparkContext.textFile(args(0))
+    val uservisits = spark.sparkContext.textFile(uservisitsPath)
+    val rankings = spark.sparkContext.textFile(rankingsPath)
 
-
-    // The schema is encoded in a string
-    //val uservisitsSchemaString = "sourceIP destURL visitDate adRevenue userAgent countryCode languageCode searchWord duration"
 
     // Generate the schema based on the string of schema
     val uservisitsSchema = StructType(
@@ -51,6 +54,14 @@ object SQLGroupBy {
       )
     )
 
+    val rankingsSchema = StructType(
+      List(
+        StructField("pageRank", IntegerType, true),
+        StructField("pageURL", StringType, true),
+        StructField("avgDuration", IntegerType, true)
+      )
+    )
+
     // Convert records of the RDD (people) to Rows
     val uservisitsRDD = uservisits
       .map(_.split("\\|"))
@@ -63,17 +74,26 @@ object SQLGroupBy {
     // Creates a temporary view using the DataFrame
     uservisitsDF.createOrReplaceTempView("uservisits")
 
-    //val results = uservisitsDF //.select(substring(col("sourceIP"), 0, 7), col("adRevenue"))
-    //  .groupBy(substring(col("sourceIP"), 1, 7)).sum("adRevenue")
+
+    val rankingsRDD = rankings
+      .map(_.split("\\|"))
+      .map(attributes => Row(attributes(0).toInt, attributes(1), attributes(2).toInt))
+
+    // Apply the schema to the RDD
+    val rankingsDF = spark.createDataFrame(rankingsRDD, rankingsSchema)
+
+    // Creates a temporary view using the DataFrame
+    rankingsDF.createOrReplaceTempView("rankings")
 
     // SQL can be run over a temporary view created using DataFrames
-    val results = spark.sql("SELECT SUBSTR(sourceIP, 1, 7) AS IP, SUM(adRevenue) AS SUM " +
-      "FROM uservisits GROUP BY SUBSTR(sourceIP, 1, 7)")
+    val results = spark.sql("SELECT * FROM Rankings As R, UserVisits As U WHERE R.pageURL = U.destURL")
 
     println(results.rdd.toDebugString)
     println(results.explain())
-    // results.write.csv("/Users/xulijie/Documents/data/SQLdata/output")
-    results.write.save(args(1))
+    // results.write.save("/Users/xulijie/Documents/data/SQLdata/output")
+    // results.write.save(args(1))
+    results.show()
+    Thread.sleep(1000 * 60 * 30)
 
   }
 

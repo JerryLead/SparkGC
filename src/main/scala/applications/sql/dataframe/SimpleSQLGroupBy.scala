@@ -9,20 +9,23 @@ import org.apache.spark.sql.{Row, SparkSession}
   *
   * SELECT SUBSTR(sourceIP, 1, 7), SUM(adRevenue) FROM uservisits GROUP BY SUBSTR(sourceIP, 1, 7);
   */
-object SQLGroupBy {
+object SimpleSQLGroupBy {
   def main(args: Array[String]): Unit = {
+
 
     if (args.length < 2) {
       System.err.println("Usage: SQLGroupBy <table_hdfs_file> <output_file>")
       System.exit(1)
     }
 
-    // val uservisitsPath = "/Users/xulijie/Documents/data/SQLdata/UserVisits-100.txt"
+
+    //val uservisitsPath = "/Users/xulijie/Documents/data/SQLdata/UserVisits-100.txt"
 
     // $example on:init_session$
     val spark = SparkSession
       .builder()
-      // .config("spark.sql.shuffle.partitions", 32)
+      //.master("local[2]")
+      //.config("spark.sql.shuffle.partitions", 32)
       .getOrCreate()
 
 
@@ -67,13 +70,14 @@ object SQLGroupBy {
     //  .groupBy(substring(col("sourceIP"), 1, 7)).sum("adRevenue")
 
     // SQL can be run over a temporary view created using DataFrames
-    val results = spark.sql("SELECT SUBSTR(sourceIP, 1, 7) AS IP, SUM(adRevenue) AS SUM " +
-      "FROM uservisits GROUP BY SUBSTR(sourceIP, 1, 7)")
+    val results = spark.sql("SELECT sourceIP, destURL, userAgent, SUM(adRevenue) AS SUM " +
+      "FROM uservisits GROUP BY sourceIP, destURL, userAgent")
 
     println(results.rdd.toDebugString)
     println(results.explain())
-    // results.write.csv("/Users/xulijie/Documents/data/SQLdata/output")
+    // results.write.save("/Users/xulijie/Documents/data/SQLdata/output")
     results.write.save(args(1))
+    // Thread.sleep(1000 * 60 * 30)
 
   }
 
