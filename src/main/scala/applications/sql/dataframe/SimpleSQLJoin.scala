@@ -27,9 +27,9 @@ object SimpleSQLJoin {
     // $example off:init_session$
     // $example on:programmatic_schema$
     // Create an RDD
+    val rankings = spark.sparkContext.textFile(args(0))
+    val uservisits = spark.sparkContext.textFile(args(1))
 
-    val uservisits = spark.sparkContext.textFile(args(0))
-    val rankings = spark.sparkContext.textFile(args(1))
 
 
     // Generate the schema based on the string of schema
@@ -84,7 +84,7 @@ object SimpleSQLJoin {
     println(results.rdd.toDebugString)
     println(results.explain())
 
-    results.write.save(args(1))
+    results.write.save(args(2))
 
   }
 
