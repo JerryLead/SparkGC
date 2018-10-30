@@ -66,6 +66,7 @@ object GroupByWithAggTest {
 
     val results = uservisitsRDD.aggregateByKey("0")((a, b) => a + "-" + b, (a, b) => a + "*" + b)
 
+
     results.foreach(println)
   }
 

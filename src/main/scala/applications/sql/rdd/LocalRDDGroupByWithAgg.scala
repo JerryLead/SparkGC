@@ -17,6 +17,7 @@ object LocalRDDGroupByWithAgg {
       System.exit(1)
     }
     */
+    val uservisitsPath = "/Users/xulijie/Documents/data/SQLdata/hibench/uservisits"
 
     // $example on:init_session$
     val spark = SparkSession
@@ -27,8 +28,6 @@ object LocalRDDGroupByWithAgg {
     // $example off:init_session$
     // $example on:programmatic_schema$
     // Create an RDD
-
-    val uservisitsPath = "/Users/xulijie/Documents/data/SQLdata/hibench/uservisits"
     val uservisits = spark.sparkContext.textFile(uservisitsPath)
 
     // Generate the schema based on the string of schema
@@ -36,6 +35,8 @@ object LocalRDDGroupByWithAgg {
       List(
         StructField("sourceIP", StringType, true),
         StructField("destURL", StringType, true),
+        StructField("d1", StringType, true),
+        StructField("d2", StringType, true),
         StructField("visitDate", StringType, true),
         StructField("adRevenue", DoubleType, true),
         StructField("userAgent", StringType, true),
@@ -47,15 +48,15 @@ object LocalRDDGroupByWithAgg {
     )
 
     // Convert records of the RDD (people) to Rows
-
     val uservisitsRDD = uservisits
       .map(_.split("\\||\\t"))
-      .map(attributes => (attributes(1), attributes(4).toDouble))
+      .map(attributes => ((attributes(1), attributes(5)), attributes(6).toDouble))
 
-
-    val results = uservisitsRDD.aggregateByKey(0.0)((a, b) => a + b, (a, b) => a + b)
+    // val results = uservisitsRDD.aggregateByKey(0.0)((a, b) => a + b, (a, b) => a + b)
+    val results = uservisitsRDD.reduceByKey((a, b) => a + b)
 
     results.foreach(println)
+    println(results.toDebugString)
   }
 
 }

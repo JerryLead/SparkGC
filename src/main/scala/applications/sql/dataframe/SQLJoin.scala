@@ -9,26 +9,23 @@ import org.apache.spark.sql.{Row, SparkSession}
   *
   * SELECT URL, adRevenue, pageRank FROM Rankings As R, UserVisits As UV WHERE R.URL = UV.URL
   */
-object LocalSQLJoin {
+object SQLJoin {
   def main(args: Array[String]): Unit = {
 
-    /*
+
     if (args.length < 3) {
-      System.err.println("Usage: RDDJoinTest <table1_hdfs_file> <table2_hdfs_file> <output_file>")
+      System.err.println("Usage: SQLJoin <table1_hdfs_file> <table2_hdfs_file> <output_file>")
       System.exit(1)
     }
-    */
 
-    val uservisitsPath = "/Users/xulijie/Documents/data/SQLdata/hibench/uservisits"
-    val rankingsPath = "/Users/xulijie/Documents/data/SQLdata/hibench/rankings"
+
+    val uservisitsPath = args(0)
+    val rankingsPath = args(1)
 
     // $example on:init_session$
     val spark = SparkSession
       .builder()
-      .master("local[2]")
-      .config("spark.sql.shuffle.partitions", 32)
       .getOrCreate()
-
 
     // $example off:init_session$
     // $example on:programmatic_schema$
@@ -91,9 +88,8 @@ object LocalSQLJoin {
 
     println(results.rdd.toDebugString)
     println(results.explain())
-    // results.write.save("/Users/xulijie/Documents/data/SQLdata/output")
-    // results.write.save(args(1))
-    results.show()
+
+    results.write.save(args(2))
   }
 
 }

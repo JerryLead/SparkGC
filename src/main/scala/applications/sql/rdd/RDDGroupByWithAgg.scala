@@ -31,6 +31,8 @@ object RDDGroupByWithAgg {
       List(
         StructField("sourceIP", StringType, true),
         StructField("destURL", StringType, true),
+        StructField("d1", StringType, true),
+        StructField("d2", StringType, true),
         StructField("visitDate", StringType, true),
         StructField("adRevenue", DoubleType, true),
         StructField("userAgent", StringType, true),
@@ -44,9 +46,10 @@ object RDDGroupByWithAgg {
     // Convert records of the RDD (people) to Rows
     val uservisitsRDD = uservisits
       .map(_.split("\\||\\t"))
-      .map(attributes => ((attributes(1), attributes(3)), attributes(4).toDouble))
+      .map(attributes => ((attributes(1), attributes(5)), attributes(6).toDouble))
 
-    val results = uservisitsRDD.aggregateByKey(0.0)((a, b) => a + b, (a, b) => a + b)
+    // val results = uservisitsRDD.aggregateByKey(0.0)((a, b) => a + b, (a, b) => a + b)
+    val results = uservisitsRDD.reduceByKey((a, b) => a + b)
 
     results.saveAsTextFile(args(1))
   }

@@ -6,7 +6,7 @@ import org.apache.spark.sql.{Row, SparkSession}
 /**
   * Created by xulijie on 17-6-20.
   *
-  * SELECT * FROM Rankings As R, UserVisits As UV WHERE R.pageURL = UR.destURL
+  * SELECT URL, adRevenue, pageRank FROM Rankings As R, UserVisits As UV WHERE R.URL = UR.URL
   */
 object RDDJoinTest {
   def main(args: Array[String]): Unit = {
@@ -21,49 +21,31 @@ object RDDJoinTest {
       .builder()
       .getOrCreate()
 
-
     // $example off:init_session$
     // $example on:programmatic_schema$
     // Create an RDD
-    val rankings = spark.sparkContext.textFile(args(0))
-    val uservisits = spark.sparkContext.textFile(args(1))
+    val uservisits = spark.sparkContext.textFile(args(0))
+    val rankings = spark.sparkContext.textFile(args(1))
 
     // The schema is encoded in a string
-    val rankingsSchemaString = "pageRank pageURL avgDuration"
-
-    // Generate the schema based on the string of schema
-    val rankingsFields = rankingsSchemaString.split(" ")
-      .map(fieldName => StructField(fieldName, StringType, nullable = true))
-    val rankingsSchema = StructType(rankingsFields)
-
-    // Convert records of the RDD (people) to Rows
-    val rankingsRDD = rankings
-      .map(_.split("\\|"))
-      .map(attributes => (attributes(1), Row(attributes(0), attributes(1), attributes(2))))
-
-    // Apply the schema to the RDD
-    // val rankingsDF = spark.createDataFrame(rankingsRDD, rankingsSchema)
-
-    // Creates a temporary view using the DataFrame
-    // rankingsDF.createOrReplaceTempView("rankings")
-
-
-
-    // The schema is encoded in a string
-    val uservisitsSchemaString = "sourceIP destURL visitDate adRevenue userAgent countryCode languageCode searchWord duration"
-
-    // Generate the schema based on the string of schema
-    val uservisitsFields = uservisitsSchemaString.split(" ")
-      .map(fieldName => StructField(fieldName, StringType, nullable = true))
-    val uservisitsSchema = StructType(uservisitsFields)
+    val uservisitsSchemaString = "sourceIP destURL d1 d2 visitDate adRevenue userAgent countryCode languageCode searchWord duration"
 
     // Convert records of the RDD (people) to Rows
     val uservisitsRDD = uservisits
-      .map(_.split("\\|"))
-      .map(attributes => (attributes(1), Row(attributes(0), attributes(1), attributes(2), attributes(3), attributes(4), attributes(5),
-        attributes(6), attributes(7), attributes(8))))
+      .map(_.split("\\||\\t"))
+      .map(attributes => (attributes(2), attributes(6)))
 
-    val result = rankingsRDD.join(uservisitsRDD)
+    // The schema is encoded in a string
+    val rankingsSchemaString = "pageURL pageRank avgDuration"
+
+
+    // Convert records of the RDD (people) to Rows
+    val rankingsRDD = rankings
+      .map(_.split("\\||\\t"))
+      .map(attributes => (attributes(1), attributes(2)))
+
+
+    val result = uservisitsRDD.join(rankingsRDD)
 
     result.saveAsTextFile(args(2))
 
